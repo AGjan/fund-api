@@ -1,0 +1,10 @@
+{
+    "apps" : [
+        {
+          "name": "marketmaker-api",
+          "script": "./dist/mm/index.js",
+          "watch": true,
+          "env": {"LD_LIBRARY_PATH": "/opt/oracle/instantclient_12_2"}
+        }
+    ]
+  }
