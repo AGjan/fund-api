@@ -40,3 +40,50 @@ export async function getNav(conn) {
     }
   };
 }
+
+const sqlGetValues = `
+select to_char(sk.tildato,'yyyy-mm-dd') "asofdate"
+     , pac_skema.vaerdi_num_rc('OFM002',p.portefoelje_id,sk.koersel_id,1,1) "nav"
+  from portefoelje p
+     , skema_parameter sp
+     , skema_Koersel sk
+where p.portefoelje_id = :1
+  and sk.skema_id = 810
+  and sp.koersel_id = sk.koersel_id
+  and sp.portefoelje_id = p.portefoelje_id
+  and not exists (
+    Select 1
+      From skema_koersel sk2
+         , skema_parameter sp2
+     Where sk2.skema_id = sk.skema_id
+       And sk2.tildato = sk.tildato
+       And sp2.koersel_id = sk2.koersel_id
+       And sp2.portefoelje_id = p.portefoelje_id
+       and sk2.koersel_id > sk.koersel_id
+    )
+union 
+select to_char(sk.tildato,'yyyy-mm-dd') asofdate
+     , pac_skema.vaerdi_num_rc('IFRIV002',p.portefoelje_id,sk.koersel_id,1,1) nav
+  from portefoelje p
+     , skema_parameter sp
+     , skema_Koersel sk
+where p.portefoelje_id = :1
+  and sk.skema_id = 8
+  and sp.koersel_id = sk.koersel_id
+  and sp.portefoelje_id = p.portefoelje_id
+  and not exists (
+    Select 1
+      From skema_koersel sk2
+         , skema_parameter sp2
+     Where sk2.skema_id = sk.skema_id
+       And sk2.tildato = sk.tildato
+       And sp2.koersel_id = sk2.koersel_id
+       And sp2.portefoelje_id = p.portefoelje_id
+       and sk2.koersel_id > sk.koersel_id
+    )
+order by 1 desc
+`;
+export async function getValues(id, conn) {
+  const result = await conn.execute(sqlGetValues, [id]);
+  return { data: result.rows };
+}

@@ -5,7 +5,8 @@ import config from '../../shared/config';
 import {
   getFunds,
   getFund,
-  getNav
+  getNav,
+  getValues
 } from './queries';
 
 oracledb.outFormat = oracledb.OBJECT;
@@ -56,6 +57,17 @@ router.get('/:id', async ctx => {
   await conn.release();
 });
 
+router.get('/:id/values', async ctx => {
+  conn = await oracledb.getConnection({
+    user: AGuser,
+    password: AGpsw,
+    connectString: AGhost
+  });
+
+  ctx.body = await getValues(ctx.params.id,conn);
+
+  await conn.release();
+});
 
 
 
